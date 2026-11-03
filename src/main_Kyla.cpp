@@ -1,5 +1,6 @@
 // Kyla - Phase 1: starts the main console.
 #include "Console_Kyla.h"
+#include "Scheduler_Enrique.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -93,6 +94,7 @@ int main() {
     try {
         [[maybe_unused]] TerminalSession terminal;
         csopesy::Console console;
+        console.setBackend(std::make_shared<csopesy::SchedulerBackend>());
         if (TerminalSession::interactive()) console.setClearScreen(TerminalSession::clear);
         console.run(std::cin, std::cout);
         return 0;

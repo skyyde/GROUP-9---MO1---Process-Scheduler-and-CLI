@@ -1,0 +1,12 @@
+# Fixed test program: ADD / SUBTRACT with literals, variables and clamping.
+DECLARE(a, 10)
+ADD(b, a, 5)                     # b = 15
+SUBTRACT(c, b, 20)               # c = 0 (clamped, would be -5)
+ADD(d, undeclared, 7)            # undeclared becomes 0, d = 7
+ADD(max, 65000, 1000)            # max = 65535 (clamped)
+PRINT("a=" + a)
+PRINT("b=" + b)
+PRINT("c=" + c)
+PRINT("d=" + d)
+PRINT("undeclared=" + undeclared)
+PRINT("max=" + max)

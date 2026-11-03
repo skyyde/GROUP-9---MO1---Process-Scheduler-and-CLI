@@ -1,0 +1,10 @@
+# Fixed test program: PRINT and DECLARE.
+# Run with:  screen -s demo_print
+PRINT()                          # default: Hello world from demo_print!
+PRINT("Plain text message")
+DECLARE(x, 42)
+PRINT("x = " + x)
+DECLARE(big, 70000)              # clamps to 65535
+PRINT("big = " + big + " (clamped)")
+DECLARE(neg, -5)                 # clamps to 0
+PRINT("neg = " + neg)

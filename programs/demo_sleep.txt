@@ -1,0 +1,4 @@
+# Fixed test program: SLEEP releases the core between the two PRINTs.
+PRINT("before sleep")
+SLEEP(50)
+PRINT("after sleep")

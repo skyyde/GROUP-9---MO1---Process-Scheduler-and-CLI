@@ -1,0 +1,10 @@
+# Fixed test program: three-level nested FOR. 2 * 3 * 4 = 24 ADDs, 6 PRINTs, 1 SLEEP per outer pass.
+DECLARE(count, 0)
+FOR([
+  FOR([
+    FOR([ADD(count, count, 1)], 4),
+    PRINT("count = " + count)
+  ], 3),
+  SLEEP(5)
+], 2)
+PRINT("final count = " + count)  # 24
