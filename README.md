@@ -1,8 +1,5 @@
 # GROUP-9---MO1---Process-Scheduler-and-CLI
 
-## Temporary run guide for the group
-
-For now, Phase 1 (console and configuration) and Phase 2 (process records) are implemented.
 
 ### Build and run on Windows
 
@@ -42,6 +39,3 @@ If `cmake` or the compiler cannot be found, check that you opened the VS develop
 prompt and installed the C++ tools. If initialization cannot find `config.txt`,
 check your current folder.
 
-See [README.txt](README.txt) for configuration details, file ownership and the
-interfaces for the next phases. We can replace this temporary guide once the
-remaining modules are integrated.

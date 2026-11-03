@@ -98,6 +98,8 @@ public:
     std::optional<Process> findActiveByName(const std::string& name) const;
     std::vector<Process> activeSnapshots() const;
     std::vector<Process> finishedSnapshots() const;
+    // One lock for the entire report, including records completing during reads.
+    std::vector<Process> allSnapshots() const;
     // Returns READY records without removing them. Phase 4 manages the queue
     // and avoids duplicate entries; dispatch checks the current state again.
     std::vector<Process> readySnapshots() const;

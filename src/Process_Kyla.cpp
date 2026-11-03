@@ -131,6 +131,14 @@ std::vector<Process> ProcessRegistry::activeSnapshots() const { return snapshots
 std::vector<Process> ProcessRegistry::finishedSnapshots() const { return snapshots(ProcessState::FINISHED); }
 std::vector<Process> ProcessRegistry::readySnapshots() const { return snapshots(ProcessState::READY); }
 
+std::vector<Process> ProcessRegistry::allSnapshots() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    std::vector<Process> result;
+    result.reserve(records_.size());
+    for (const auto& entry : records_) result.push_back(entry.second);
+    return result;
+}
+
 void ProcessRegistry::dispatch(ProcessId pid, std::uint64_t coreId) {
     std::lock_guard<std::mutex> lock(mutex_);
     auto& process = require(pid);
