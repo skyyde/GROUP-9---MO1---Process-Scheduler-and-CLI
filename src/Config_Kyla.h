@@ -1,3 +1,4 @@
+// Kyla - Phase 1: configuration settings and file loading.
 #pragma once
 
 #include <cstdint>
@@ -9,7 +10,7 @@ namespace csopesy {
 
 enum class SchedulerPolicy { Fcfs, RoundRobin };
 
-// Phase 1, Kyla: settings are published by Console only after full validation.
+// The console stores these settings after all values have been validated.
 struct Config {
     std::uint64_t numCpu;
     SchedulerPolicy scheduler;
@@ -20,6 +21,7 @@ struct Config {
     std::uint64_t delaysPerExec;
 };
 
+// The inclusive 2^32 limit needs 64-bit storage.
 inline constexpr std::uint64_t MaxConfigCycles = std::uint64_t{1} << 32;
 
 class ConfigError : public std::runtime_error {
@@ -27,7 +29,7 @@ public:
     using std::runtime_error::runtime_error;
 };
 
-// Both functions throw ConfigError on invalid or unreadable input; no defaults.
+// Invalid settings or unreadable input throw ConfigError.
 Config parseConfig(std::istream& input);
 Config loadConfig(const std::string& path);
 

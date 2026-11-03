@@ -1,3 +1,4 @@
+// Kyla - Phase 1: reads and validates config.txt.
 #include "Config_Kyla.h"
 
 #include <array>
@@ -19,7 +20,7 @@ std::uint64_t readNumber(const std::map<std::string, std::string>& values,
                          std::uint64_t maximum) {
     const auto& token = values.at(key);
     std::uint64_t number = 0;
-    // Digits only: reject signs, fractions, exponent notation and partial parses.
+    // Accept decimal digits only, so signs and partial numbers are rejected.
     if (token.empty() || token.find_first_not_of("0123456789") != std::string::npos) {
         throw ConfigError("Setting '" + key + "' requires an unsigned decimal integer.");
     }

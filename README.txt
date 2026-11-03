@@ -1,23 +1,26 @@
 CSOPESY MAJOR OUTPUT 1 - PROCESS SCHEDULER AND CLI
 ================================================
 
+TEMPORARY RUN GUIDE FOR THE GROUP
+See README.md for Windows setup, build commands and commands to try.
+
 Phase 1 is implemented: terminal console, command parsing, external configuration,
-initialization, error handling and clean exit. Phases 2-8 remain unimplemented.
+initialization, error handling and clean exit. Phase 2 is also implemented: process
+records, a synchronized registry, lifecycle operations and safe snapshots.
+Phases 3-8 remain unimplemented.
 This project will eventually simulate a process multiplexer and multicore FCFS/RR
-scheduler. Phase 1 does not create processes, execute instructions, schedule work,
+scheduler. The CLI does not create processes, execute instructions, schedule work,
 start threads, generate reports or display invented CPU statistics.
 
-The existing repository and its original README.md are preserved. There was no
-existing source code, build configuration or professor specification in this
-checkout. Validation follows the supplied Phase 1 checklist, including inclusive
-2^32 limits. No repository replacement or file renaming was necessary.
+Configuration validation follows the Phase 1-2 checklist, including the inclusive
+2^32 limit. The other members' modules are still placeholders for their phases.
 
 FILE OWNERSHIP AND GROUP RESPONSIBILITIES
 =======================================
 Member   Phases   Assigned responsibilities and files
-Kyla     1-2      Project setup, CLI, configuration, initialization; later processes.
+Kyla     1-2      Project setup, CLI, configuration, initialization; process representation.
                  src/main_Kyla.cpp, src/Config_Kyla.h/.cpp,
-                 src/Console_Kyla.h/.cpp, tests/Phase1Tests_Kyla.cpp;
+                 src/Console_Kyla.h/.cpp;
                  Phase 2: src/Process_Kyla.h/.cpp.
 Enrique  3-4      Instructions and CPU scheduler.
                  src/Instruction_Enrique.h/.cpp, src/Scheduler_Enrique.h/.cpp.
@@ -26,9 +29,9 @@ Nicos    5-6      Screens and automatic process generation.
 Ced      7-8      CPU reporting, final integration, testing and submission.
                  src/Report_Ced.h/.cpp; Phase 8 integration/testing work later.
 
-Kyla maintains config.txt, CMakeLists.txt, .gitignore and this README for Phase 1.
+Kyla maintains config.txt, CMakeLists.txt, .gitignore and this README for Phases 1-2.
 Shared project metadata keeps its standard filenames. Keep member suffixes on
-source and test files. Each future-phase header/source identifies its owner,
+source files. Each future-phase header/source identifies its owner,
 phase, responsibility and planned features with TODO: NOT IMPLEMENTED YET.
 
 FOLDER STRUCTURE
@@ -38,46 +41,41 @@ Repository root (keep the existing repository name)
     main_Kyla.cpp
     Config_Kyla.h / Config_Kyla.cpp
     Console_Kyla.h / Console_Kyla.cpp
-    Process_Kyla.h / Process_Kyla.cpp                 [Phase 2 placeholder]
+    Process_Kyla.h / Process_Kyla.cpp                 [Phase 2 implemented]
     Instruction_Enrique.h / Instruction_Enrique.cpp   [Phase 3 placeholder]
     Scheduler_Enrique.h / Scheduler_Enrique.cpp       [Phase 4 placeholder]
     Screen_Nicos.h / Screen_Nicos.cpp                [Phase 5 placeholder]
     AutoGenerator_Nicos.h / AutoGenerator_Nicos.cpp   [Phase 6 placeholder]
     Report_Ced.h / Report_Ced.cpp                    [Phase 7 placeholder]
-  tests/Phase1Tests_Kyla.cpp
   config.txt
   README.txt
-  README.md                                         [original, preserved]
+  README.md                                         [temporary run guide]
   CMakeLists.txt
   .gitignore
   build/                                            [generated, ignored]
 
 BUILD AND EXECUTION
 ===================
-Requirements: a C++17 compiler and CMake 3.16 or newer. No external libraries or
-test framework are required. Run commands from the repository root.
+Requirements: a C++17 compiler and CMake 3.16 or newer. Run commands from the repository root.
 
 Windows: open an x64 Native Tools/Developer Command Prompt for Visual Studio with
 the C++ build tools, CMake and Ninja installed, then run:
 
   cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
   cmake --build build
-  ctest --test-dir build --output-on-failure -V
   .\build\csopesy.exe
 
 If using a Visual Studio multi-configuration generator instead, use a separate
-build directory and select the configuration for build, tests and execution:
+build directory and select the configuration for build and execution:
 
   cmake -S . -B build-vs
   cmake --build build-vs --config Debug
-  ctest --test-dir build-vs -C Debug --output-on-failure -V
   .\build-vs\Debug\csopesy.exe
 
 Linux/macOS with a C++17 toolchain:
 
   cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
   cmake --build build
-  ctest --test-dir build --output-on-failure -V
   ./build/csopesy
 
 The runtime config.txt is read from the CURRENT WORKING DIRECTORY, not the
@@ -86,11 +84,10 @@ When launching from an IDE, set the working directory to the repository root.
 The build deliberately does not copy config.txt, avoiding stale build copies.
 To run elsewhere, place your configuration in that working directory.
 
-CMake builds phase1_Kyla from Config_Kyla.cpp and Console_Kyla.cpp. The csopesy
-executable adds only main_Kyla.cpp. Future-phase placeholders are not compiled.
-The test runner is a separate executable with its own main(), never linked into
-csopesy. There is exactly one application main(): src/main_Kyla.cpp.
-Use -DBUILD_TESTING=OFF when configuring an application-only build.
+CMake builds phase1_Kyla from Config_Kyla.cpp and Console_Kyla.cpp, linked to
+phase2_Kyla (Process_Kyla.cpp and standard Threads::Threads). csopesy adds only
+main_Kyla.cpp. Phase 3-8 placeholders are not compiled.
+There is exactly one application main(): src/main_Kyla.cpp.
 
 CONFIGURATION FORMAT
 ====================
@@ -152,8 +149,8 @@ The application starts UNINITIALIZED. Only valid initialize and exit commands
 operate in that state; operational commands say:
   Error: Please initialize the emulator first.
 
-initialize reads every setting into a temporary validated Config before storing
-it. Failure reports the setting/path, leaves no partial configuration and allows
+initialize validates a temporary Config, constructs an empty ProcessRegistry,
+and publishes both on success. Failure leaves no partial configuration and allows
 another attempt. Success prints:
   Reading configuration...
   Configuration loaded successfully.
@@ -167,31 +164,6 @@ reloads the file. After initialization, all six future operational commands say:
 exit prints "Exiting CSOPESY Emulator..." and stops the loop. EOF also ends the
 loop cleanly; a non-EOF input failure reports an error and stops without spinning.
 No process-screen exit behavior is implemented in this phase.
-
-PHASE 1 TESTING
-===============
-Build and run CTest using the commands above. To see the check count directly:
-  .\build\phase1_tests.exe
-
-Tests use standard C++ checks that remain active in release builds, plus temporary
-configuration files in uniquely created directories. They do not edit the user's
-config.txt. They cover startup/prompt, full-line input, whitespace, invalid syntax,
-all eight command forms, initialization gating/retry/idempotence, actual file
-loading, both policies, all seven fields, missing/duplicate/unknown keys, malformed
-values, numeric overflow, every numeric limit, instruction ordering, configuration
-changes across sessions, exit before/after initialization, EOF, stream read errors
-and the future handler interface. Test handlers are test-only callbacks and do not
-implement future-phase features. A failing check makes the test runner exit nonzero.
-
-For a real executable smoke test in PowerShell, run from the repository root:
-  @('screen -ls', 'initialize', 'screen -s test', 'screen -r test', 'screen -ls',
-    'scheduler-start', 'scheduler-stop', 'report-util', 'screen -s',
-    'unknown', 'initialize', 'exit') | .\build\csopesy.exe
-
-Verify the heading/prompt, pre-initialization error, successful initialization,
-honest later-phase responses, usage/unknown-command errors, repeated initialization
-message and clean exit. A final integration/black-box submission suite belongs
-to Ced's Phase 8 and is not part of this implementation.
 
 INTEGRATION INSTRUCTIONS FOR GROUPMATES
 ======================================
@@ -216,28 +188,167 @@ lifetimes that cover console.run(); use the provided output stream for CLI outpu
 Registration/console calls currently belong to the console thread. Future background
 state and synchronization must be designed by the responsible members.
 
-Kyla (Phase 2): implement Process_Kyla.h/.cpp, including the process registry and
-state model. Coordinate its public interface with instruction/scheduler/screen
-owners. Phase 1 supplies no fake process types.
+PHASE 2 PROCESS MODEL AND SERVICE
+================================
+After successful initialization, console.processRegistry() returns the service.
+Both const and mutable access throw std::logic_error before initialization, even
+after a failed attempt. Only Console can construct a registry, using its validated
+Config. Repeated initialize preserves the same service, records and configuration.
+Console operations belong to the console thread. Obtain the registry reference
+after initialization, then publish it to future worker threads. Join all workers
+before destroying Console; a service reference must not outlive its owner.
 
-Enrique (Phases 3-4): implement Instruction_Enrique.h/.cpp and Scheduler_Enrique.h/.cpp.
-Use Config fields for CPU count, policy, quantum and execution delays. Coordinate
-one-time scheduler startup after successful initialization with Kyla, and shutdown
-on both exit and EOF. The scheduler must later run while console input waits.
-There are currently no background resources or lifecycle hooks to manage.
+Process is a detached value snapshot containing PID/name, creation and finish
+system-clock timestamps, state, optional current and last core IDs, program
+metadata, instruction progress, uint16 variables, loop frames, PRINT logs and
+sleep/quantum/execution-delay counters. Editing a copy cannot mutate live records.
+Snapshots remain valid after completion or registry destruction. Historical
+snapshots may retain old variables; completing a process clears its live variables,
+not previously returned caller-owned copies.
 
-Nicos (Phases 5-6): implement Screen_Nicos.h/.cpp and AutoGenerator_Nicos.h/.cpp.
-Register CommandType::ScreenCreate, ScreenResume, SchedulerStart and SchedulerStop.
-Use command.processName and validated config.batchProcessFreq. Add process-smi
-and process-screen exit inside the future screen context. Stopping the generator
-must eventually leave existing processes running.
+All registry reads and writes use one mutex. No mutable record/container references
+escape. Every operation is atomic; a sequence of separate API calls is not a
+transaction. No user callbacks are invoked while holding the lock. A future worker
+must exclusively own execution of its dispatched process: a read/compute/write
+sequence for an instruction needs that Phase 4 ownership discipline. The registry
+is noncopyable and owns its records with standard containers. Finished records
+stay until registry destruction; there is intentionally no erase/reuse API.
 
-Ced (Phase 7): implement Report_Ced.h/.cpp. Register CommandType::ScreenList and
-ReportUtil, using real process/scheduler snapshots for utilization and reports.
-Phase 8 later covers integration, FCFS/RR tests with 1/4/128 CPUs, configuration
-variations, black-box cases, source/GitHub submission, presentation and MP4 demos.
+PIDs are nonzero uint64 values allocated atomically across all registries in the
+application process. They are never reused, including after registry destruction.
+The maximum PID can be allocated once; subsequent requests throw ProcessError
+instead of wrapping. Zero is reserved. Allocation failures can leave PID gaps.
+PIDs restart with the application. The registry keeps its PID sequence private. Names are case-sensitive, 1-64 ASCII characters
+from [A-Za-z0-9_-], including process01 and p01. Duplicate names, including finished
+names, are rejected for the registry's entire lifetime. Names may repeat in a new
+application session. The console accepts one token syntactically; future screen
+creation must also apply this registry name policy.
 
-As each phase becomes complete, explicitly add its .cpp files to the appropriate
-CMake target and add meaningful tests. Do not glob all sources, add a second main
-to csopesy, or wire incomplete placeholders into the active build. Keep ownership
-suffixes and agree on shared interfaces before changing another member's module.
+createProcess(name, ProcessProgram) validates inputs, allocates identity/time,
+initializes READY with zero counters and progress, and registers the record plus
+name index under the same lock. Index allocation failure rolls back the record.
+READY snapshots are non-consuming: new, released and awakened records remain
+visible until dispatch or completion. Phase 4 must maintain its actual shared
+READY queue, deduplicate admission and use dispatch() to revalidate stale entries.
+The snapshot order is PID order, not an FCFS or Round Robin scheduling policy.
+An empty/final READY process is visible for finalization; dispatch rejects it.
+No scheduler, ready-queue drain, worker thread or timing loop is implemented here.
+
+LEGAL LIFECYCLE AND CORE INVARIANTS
+=================================
+Creation -> READY
+READY -> RUNNING                 dispatch(pid, coreId)
+RUNNING -> READY                 releaseToReady(pid)
+RUNNING -> SLEEPING              sleep(pid, ticks)
+SLEEPING -> READY                setSleepTicks(pid, 0), then wake(pid)
+RUNNING or READY -> FINISHED     complete(pid), only with final progress
+
+READY/SLEEPING/FINISHED never own an active core. RUNNING owns exactly one core
+from 0 through validated numCpu-1. dispatch rejects redispatch, an occupied core,
+out-of-range cores and final progress. The single registry lock also prevents two
+records from claiming the same core. This is registry bookkeeping, not a real CPU
+worker/core table or global allocation across independent application sessions.
+Release, sleep and finish clear the active core; lastCore preserves reporting
+history. Sleep ticks are unsigned, externally supplied and cannot increase once
+sleeping. wake requires zero ticks; sleep(0) can wake explicitly. No ticking occurs.
+
+setExecutionCounters stores quantum and execution delay bounded by the configured
+quantumCycles/delaysPerExec. Both start at zero; Phase 4 initializes/resets them when
+appropriate. They survive release, sleep, wake and migration between cores.
+Execution delay does not release a core. Sleep is separate from execution delay.
+Completion clears all active counters and variables, stamps finishedAt, preserves
+identity, creation time, final progress/program, lastCore and logs, and removes
+active/READY eligibility by state. Repeated completion returns false without
+changing the record. Unknown PIDs and other invalid mutations throw ProcessError;
+missing lookups return std::nullopt. There is no generic unrestricted state setter.
+
+INSTRUCTION PROGRAM, PROGRESS, VARIABLES AND LOGS
+================================================
+ProcessProgram contains shared_ptr<const csopesy::InstructionProgram>, a forward
+declaration only; Enrique defines the program in Phase 3. It is NOT a competing
+instruction class or interpreter. Phase 2 links without any Phase 3 definition.
+Supply a real immutable program and metadata to createProcess, or reserve a record
+with a null handle and known metadata, then attachProgram(pid, sharedProgram) once
+while READY, before any progress/loop state. A null handle means explicitly pending
+attachment. Phase 4 must not execute a record whose program handle is null.
+Freeze a program after publication; do not retain a mutable alias and modify it
+concurrently. Shared ownership keeps attached programs alive through snapshots.
+
+staticInstructionCount is the number of addressable positions in a flattened
+program. currentInstruction is a position in [0, staticInstructionCount], with the
+upper value representing the end; it may move backwards for a loop. totalInstructions
+is the expanded operation budget including loop repetitions. executedInstructions
+is monotonic and must be <= totalInstructions; it may exceed the static count.
+Phase 3 defines whether FOR control operations count and calculates totals using
+that same rule. It must detect overflow when expanding nested loops. Phase 2 stores
+uint64 counts without allocating instruction objects. Empty programs use zero for
+both counts and can finish directly from READY. Nonempty programs require both
+counts positive. Totals are fixed at creation; metadata must match the real program.
+minIns/maxIns constrain future generation, not storage of explicit/empty programs.
+No instruction count is randomly selected or hardcoded in the registry.
+
+setProgress stores position, executed count and the full nested loop stack together.
+Frames are outermost first and store [begin,end), next and remainingIterations.
+Bounds/nesting and positive remaining iterations are checked. Phase 3 removes
+finished frames and supplies its updated state; Phase 2 never advances a loop.
+Completion requires executed == total, current position == static count and an
+empty loop stack. This prevents incomplete records from being silently finalized.
+
+setVariable(pid,name,value) stores/updates one process-local uint16 value. It rejects
+empty names and values above 65535; variable(pid,name) returns an optional copied
+value without implicitly declaring missing variables. DECLARE/ADD/SUBTRACT,
+expression evaluation, variable-name grammar and arithmetic clamping are Phase 3.
+Variables persist across active state changes and are cleared on completion.
+
+appendLog(pid, PrintLogEntry{timestamp, optionalCoreId, message}) stores explicit
+caller-supplied log data. Core IDs, if present, must be within configured bounds.
+Append order is preserved even if wall-clock timestamps arrive out of order.
+A supplied core may describe historical execution; it is not required to match the
+current assignment. Logs do not print to the main console. Finished history is
+readable but immutable. Display/report snapshots include ordered log entries.
+
+FUTURE INTEGRATION GUIDE (EXPLANATIONS ONLY)
+===========================================
+Enrique - Phase 3:
+  Define csopesy::InstructionProgram in your instruction module. Create immutable
+  shared programs and calculate static/expanded counts; supply ProcessProgram to
+  createProcess or attach a real handle to a record with matching metadata.
+  Use variable/setVariable for uint16 storage, setProgress for position/count/loop
+  context, and appendLog for PRINT results. Implement instructions only in your
+  own files. A real program's attachment/execution cannot be exercised until that
+  type exists; this stage verifies the compile-safe structure and metadata API.
+
+Enrique - Phase 4:
+  Obtain the initialized registry once. Admit readySnapshots into your own shared
+  queue with deduplication; final-progress READY records should be completed.
+  dispatch atomically checks state/core availability; catch ProcessError for stale
+  queue entries. Use releaseToReady for release, sleep for blocking, setSleepTicks
+  and wake after your ticks expire, setExecutionCounters for saved quantum/delay,
+  and complete after final progress. Do not execute null program handles.
+  Coordinate worker ownership across separate registry calls and join workers on
+  exit/EOF before Console destruction. Implement algorithms, ticks and workers in
+  Scheduler_Enrique files, using validated config values; none exist yet.
+
+Nicos - Phase 5:
+  findActiveByName supports attachment lookup; findByPid/findByName retain finished
+  reporting records. Snapshots expose name/PID/state, progress, totals and logs.
+  A screen already attached can keep its PID and display the final snapshot after
+  completion. Refuse new reattachment when state is FINISHED. Add process-smi and
+  screen-local exit in your future screen context; main-console commands stay
+  deferred until you install their handlers.
+
+Nicos - Phase 6:
+  Use createProcess with your unique generated name and Enrique's real program.
+  Duplicate-name ProcessError includes finished-name conflicts; never overwrite.
+  Use validated minIns/maxIns and batchProcessFreq. Implement naming and generation
+  timing in AutoGenerator_Nicos; scheduler-start/stop remain deferred now.
+
+Ced - Phase 7:
+  activeSnapshots includes READY/RUNNING/SLEEPING; filter state for RUNNING.
+  finishedSnapshots supplies retained finished records. Both contain progress,
+  program totals, creation/finish timestamps, current/last core and logs. These
+  are storage views, not utilization percentages or live CPU statistics. Combine
+  them with Phase 4's actual scheduler data to implement your reports later.
+
+Phase 8 remains Ced's later full-system integration, algorithm tests and submission.
+Add each completed module's .cpp files to CMake when it is ready to be integrated.

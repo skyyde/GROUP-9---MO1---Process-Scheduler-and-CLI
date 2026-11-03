@@ -1,3 +1,4 @@
+// Kyla - Phase 1: starts the main console.
 #include "Console_Kyla.h"
 
 #include <iostream>

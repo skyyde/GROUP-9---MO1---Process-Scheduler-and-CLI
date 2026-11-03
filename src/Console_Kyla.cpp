@@ -1,3 +1,4 @@
+// Kyla - Phase 1: command parsing, initialization and the input loop.
 #include "Console_Kyla.h"
 
 #include <array>
@@ -73,6 +74,16 @@ const Config* Console::configuration() const noexcept {
     return config_ ? &*config_ : nullptr;
 }
 
+ProcessRegistry& Console::processRegistry() {
+    if (!processes_) throw std::logic_error("Initialize the emulator before accessing processes.");
+    return *processes_;
+}
+
+const ProcessRegistry& Console::processRegistry() const {
+    if (!processes_) throw std::logic_error("Initialize the emulator before accessing processes.");
+    return *processes_;
+}
+
 void Console::registerHandler(CommandType type, CommandHandler handler) {
     if (!isOperational(type) || !handler) {
         throw std::invalid_argument("A handler requires an operational command and a callable.");
@@ -98,9 +109,12 @@ bool Console::executeLine(const std::string& line, std::ostream& output) {
         }
         output << "Reading configuration...\n";
         try {
-            // loadConfig finishes validation before optional settings are committed.
+            // Validate the config and create the registry before marking initialization complete.
             const Config validated = loadConfig(configPath_);
+            // Only the console can create a registry with validated settings.
+            auto processes = std::unique_ptr<ProcessRegistry>(new ProcessRegistry(validated));
             config_ = validated;
+            processes_ = std::move(processes);
         } catch (const ConfigError& error) {
             output << "Error: " << error.what() << '\n';
             return true;
