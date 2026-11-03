@@ -1,0 +1,14 @@
+# Out-of-source CMake and local IDE/compiler output
+/build/
+/build-*/
+/out/
+/.vs/
+*.obj
+*.o
+*.exe
+*.pdb
+*.ilk
+*.idb
+*.tlog
+*.user
+/csopesy-log.txt
