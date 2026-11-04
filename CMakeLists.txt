@@ -22,7 +22,7 @@ target_include_directories(phase3_Enrique PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/sr
 target_compile_features(phase3_Enrique PUBLIC cxx_std_17)
 set_target_properties(phase3_Enrique PROPERTIES CXX_EXTENSIONS OFF)
 
-add_library(phase4_Enrique src/Scheduler_Enrique.cpp)
+add_library(phase4_Enrique src/Scheduler_Enrique.cpp src/AutoGenerator_Nicos.cpp)
 target_link_libraries(phase4_Enrique PUBLIC phase3_Enrique phase1_Kyla)
 target_compile_features(phase4_Enrique PUBLIC cxx_std_17)
 set_target_properties(phase4_Enrique PROPERTIES CXX_EXTENSIONS OFF)

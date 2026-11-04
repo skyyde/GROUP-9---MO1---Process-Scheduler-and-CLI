@@ -17,6 +17,7 @@
 //Phase 4: CPU scheduler
 #pragma once
 
+#include "AutoGenerator_Nicos.h"
 #include "Console_Kyla.h"
 #include "Instruction_Enrique.h"
 #include "Process_Kyla.h"
@@ -135,6 +136,7 @@ private:
     std::chrono::milliseconds tickInterval_;
     std::optional<Config> config_;
     ProcessRegistry* registry_ = nullptr;
+    std::unique_ptr<AutoGenerator> generator_;
     std::unique_ptr<CpuScheduler> scheduler_;
     std::mutex createMutex_;
     std::mt19937_64 rng_;

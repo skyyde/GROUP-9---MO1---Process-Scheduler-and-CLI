@@ -268,17 +268,21 @@ void SchedulerBackend::initialize(const Config& config, ProcessRegistry& registr
     config_ = config;
     registry_ = &registry;
     scheduler_ = std::make_unique<CpuScheduler>(config, registry);
+    generator_ = std::make_unique<AutoGenerator>(config.batchProcessFreq, registry,
+                                                 [this](const std::string& name) { createProcess(name); });
+    scheduler_->setTickObserver([this](std::uint64_t tick) { generator_->onTick(tick); });
     scheduler_->start(tickInterval_);
 }
 
 void SchedulerBackend::shutdown() noexcept {
+    if (generator_) generator_->stop();
     if (scheduler_) scheduler_->stop();
 }
 
 RuntimeStatus SchedulerBackend::status() const {
     RuntimeStatus result;
     if (scheduler_) result.scheduler = scheduler_->running() ? ServiceState::Running : ServiceState::Stopped;
-    result.generation = ServiceState::Unavailable;
+    if (generator_) result.generation = generator_->enabled() ? ServiceState::Running : ServiceState::Stopped;
     return result;
 }
 
@@ -300,11 +304,12 @@ ProcessId SchedulerBackend::createProcess(const std::string& name) {
 }
 
 void SchedulerBackend::startGeneration() {
-    throw std::logic_error("Automatic process generation is implemented in Phase 6.");
+    if (!generator_) throw std::logic_error("Initialize the scheduler before starting generation.");
+    generator_->start();
 }
 
 void SchedulerBackend::stopGeneration() {
-    throw std::logic_error("Automatic process generation is implemented in Phase 6.");
+    if (generator_) generator_->stop();
 }
 
 }
