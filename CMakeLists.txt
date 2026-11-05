@@ -10,7 +10,7 @@ set_target_properties(phase2_Kyla PROPERTIES CXX_EXTENSIONS OFF)
 target_link_libraries(phase2_Kyla PUBLIC Threads::Threads)
 
 add_library(phase1_Kyla src/Config_Kyla.cpp src/Console_Kyla.cpp
-    src/TerminalView_Kyla.cpp src/UtilizationReport_Kyla.cpp)
+    src/TerminalView_Kyla.cpp src/UtilizationReport_Kyla.cpp src/Report_Ced.cpp)
 target_link_libraries(phase1_Kyla PUBLIC phase2_Kyla)
 target_include_directories(phase1_Kyla PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(phase1_Kyla PUBLIC cxx_std_17)
@@ -35,6 +35,14 @@ add_executable(phase34_tests src/tests/Phase34Tests_Enrique.cpp)
 target_link_libraries(phase34_tests PRIVATE phase4_Enrique)
 target_compile_definitions(phase34_tests PRIVATE PROGRAM_DIR="${CMAKE_CURRENT_SOURCE_DIR}/programs")
 add_test(NAME phase34_tests COMMAND phase34_tests)
+
+add_executable(report_ced_tests src/tests/Report_CedTests.cpp)
+target_link_libraries(report_ced_tests PRIVATE phase4_Enrique)
+add_test(NAME report_ced_tests COMMAND report_ced_tests)
+
+add_executable(phase8_ced_tests src/tests/Phase8_CedTests.cpp)
+target_link_libraries(phase8_ced_tests PRIVATE phase4_Enrique)
+add_test(NAME phase8_ced_tests COMMAND phase8_ced_tests)
 
 foreach(target phase1_Kyla phase2_Kyla phase3_Enrique phase4_Enrique csopesy phase34_tests)
     if(TARGET ${target})

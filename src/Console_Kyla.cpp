@@ -1,5 +1,6 @@
 // Kyla - Phase 1: command parsing, initialization and the input loop.
 #include "Console_Kyla.h"
+#include "Report_Ced.h"
 
 #include <array>
 #include <fstream>
@@ -256,12 +257,7 @@ bool Console::executeCommand(const Command& command, std::ostream& output) {
             terminal::runtime(output, runtimeStatus());
             break;
         case CommandType::ReportUtil: {
-            const auto report = terminal::utilization(utilizationSnapshot());
-            std::ofstream file("csopesy-log.txt", std::ios::out | std::ios::trunc);
-            if (!file) throw std::runtime_error("Cannot write csopesy-log.txt.");
-            file << report;
-            file.close();
-            if (!file) throw std::runtime_error("Unable to finish writing csopesy-log.txt.");
+            report::saveUtilizationReport(utilizationSnapshot());
             terminal::notice(output, "Utilization report saved to csopesy-log.txt.", "SUCCESS");
             break;
         }
