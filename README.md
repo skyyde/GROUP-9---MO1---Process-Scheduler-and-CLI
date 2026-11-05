@@ -1,6 +1,6 @@
 # GROUP-9---MO1---Process-Scheduler-and-CLI
 
-- Pallarca, Cedri
+- Pallarca, Cedric
 - Cruz, Enrique
 - Aguirre, Kyla
 - Reyes, Nicos
