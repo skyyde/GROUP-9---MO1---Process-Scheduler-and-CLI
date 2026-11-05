@@ -28,6 +28,7 @@ target_compile_features(phase4_Enrique PUBLIC cxx_std_17)
 set_target_properties(phase4_Enrique PROPERTIES CXX_EXTENSIONS OFF)
 
 add_executable(csopesy src/main_Kyla.cpp)
+set_property(TARGET csopesy PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 target_link_libraries(csopesy PRIVATE phase1_Kyla phase4_Enrique)
 
 enable_testing()
